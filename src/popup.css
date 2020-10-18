@@ -1,0 +1,23 @@
+.product-table {
+	padding: 5px;
+}
+
+th {
+	width: 1px;
+	white-space: nowrap;
+	padding: 0 15px;
+}
+
+td {
+	width: 1px;
+	white-space: nowrap;
+	padding: 0 5px;
+}
+
+tr:nth-child(even) {
+	background: #ccc;
+}
+
+tr:nth-child(odd) {
+	background: #fff;
+}

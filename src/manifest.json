@@ -1,0 +1,25 @@
+{
+	"name": "Queue Tracker for EVGA",
+	"version": "0.2",
+	"description": "Queue Tracker for EVGA helps track your position in the evga notification queues, estimating when you'll get your shiny new 3080.",
+	"icons": {
+		"16": "icon16.png",
+		"48": "icon48.png",
+		"128": "icon128.png"
+	},
+	"manifest_version": 2,
+	"permissions": ["storage", "alarms", "tabs", "notifications"],
+	"background": {
+		"page": "background.html",
+		"persistent": false
+	},
+	"browser_action": {
+		"default_popup": "popup.html"
+	},
+	"content_scripts": [
+		{
+			"matches": ["*://www.evga.com/community/myNotifies.asp", "*://secure.evga.com/*/login.asp"],
+			"js": ["content.js"]
+		}
+	]
+}
