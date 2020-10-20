@@ -8,6 +8,7 @@ const zip = require("gulp-zip");
 const { dest } = require("gulp");
 
 const paths = {
+	license: ["LICENSE"],
 	sources: ["src/*"],
 	ts: ["src/*.ts"],
 	static: ["src/*.html", "src/*.css", "src/manifest.json", "src/*.png"],
@@ -49,12 +50,12 @@ function bundlePopup() {
 }
 
 function outputScripts() {
-	return gulp.src(paths.intermediate + "/*.js").pipe(gulp.dest(paths.output));
+	return gulp.src([paths.intermediate + "/*.js", "!" + paths.intermediate + "/firebase_config.js"]).pipe(gulp.dest(paths.output));
 }
 
 function minify() {
 	return gulp
-		.src(paths.intermediate + "/*.js")
+		.src([paths.intermediate + "/*.js", "!" + paths.intermediate + "/firebase_config.js"])
 		.pipe(uglify())
 		.pipe(gulp.dest(paths.output));
 }
@@ -65,6 +66,10 @@ function cleanTmp() {
 
 function copyStaticAssets() {
 	return gulp.src(paths.static).pipe(gulp.dest(paths.output));
+}
+
+function copyLicense() {
+	return gulp.src(paths.license).pipe(gulp.dest(paths.output));
 }
 
 function compressArtifacts() {
@@ -81,7 +86,10 @@ gulp.task("clean", clean);
 gulp.task("build", gulp.series("clean", transpile, bundleBackground, bundleContent, bundlePopup, outputScripts, cleanTmp, copyStaticAssets));
 gulp.task("watch", () => gulp.watch(paths.sources, gulp.series(["build"])));
 gulp.task("minify", gulp.series("clean", transpile, bundleBackground, bundleContent, bundlePopup, minify, cleanTmp, copyStaticAssets));
-gulp.task("pack", gulp.series("clean", transpile, bundleBackground, bundleContent, bundlePopup, minify, cleanTmp, copyStaticAssets, compressArtifacts));
+gulp.task(
+	"pack",
+	gulp.series("clean", transpile, bundleBackground, bundleContent, bundlePopup, minify, cleanTmp, copyStaticAssets, copyLicense, compressArtifacts)
+);
 
 // The default task (called when you run `gulp` from CLI).
 gulp.task("default", gulp.series(["build", "watch"]));
