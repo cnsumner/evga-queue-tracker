@@ -18,7 +18,7 @@
 	},
 	"content_scripts": [
 		{
-			"matches": ["*://www.evga.com/community/myNotifies.asp", "*://secure.evga.com/*/login.asp"],
+			"matches": ["https://www.evga.com/community/myNotifies.asp"],
 			"js": ["content.js"]
 		}
 	]

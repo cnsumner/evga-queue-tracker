@@ -30,11 +30,11 @@ chrome.alarms.create("scraper_timer", { when: Date.now() + 1000, periodInMinutes
 function handleData(result: { error: boolean; type: string; userName: string; notificationInfo: { product: string; signupTime: string; notified: string }[] }) {
 	if (result) {
 		if (result.error === true && result.type !== "notLoggedIn") {
-			chrome.notifications.create({
+			chrome.notifications.create("errorParsing", {
 				type: "basic",
 				iconUrl: "./icon.png",
 				title: "Queue Tracker for EVGA",
-				message: "Error scraping data. Contact the developer about this one chief.",
+				message: "Error scraping data. Contact the developer about this one, chief.",
 			});
 		} else {
 			let db = firebase.firestore();
@@ -64,6 +64,12 @@ function handleData(result: { error: boolean; type: string; userName: string; no
 	}
 }
 
+chrome.notifications.onButtonClicked.addListener((notificationId, buttonIndex) => {
+	if (notificationId === "notLoggedIn" && buttonIndex === 0) {
+		chrome.tabs.create({ url: "https://secure.evga.com/us/login.asp" });
+	}
+});
+
 chrome.alarms.onAlarm.addListener((alarm) => {
 	if (alarm.name === "scraper_timer") {
 		console.log("scraping notifications page...");
@@ -71,11 +77,14 @@ chrome.alarms.onAlarm.addListener((alarm) => {
 			chrome.tabs.onUpdated.addListener(function evgaPageLoadedListener(tabId, changeInfo, tab) {
 				if (changeInfo.status === "complete" && createdTab.id === tabId) {
 					if (tab.url === "https://secure.evga.com/US/login.asp") {
-						chrome.notifications.create({
+						chrome.notifications.clear("notLoggedIn");
+						chrome.notifications.create("notLoggedIn", {
+							isClickable: false,
 							type: "basic",
 							iconUrl: "./icon.png",
 							title: "Queue Tracker for EVGA",
-							message: "Error: Not logged into EVGA, please log in to evga.com for this extension to work.",
+							message: "Error: Not signed in to EVGA, please sign in to evga.com for this extension to work.",
+							buttons: [{ title: "Sign In" }],
 						});
 						chrome.tabs.remove(tabId);
 					} else {
