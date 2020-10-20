@@ -4,6 +4,8 @@ const uglify = require("gulp-uglify");
 const del = require("del");
 const ts = require("gulp-typescript");
 const source = require("vinyl-source-stream");
+const zip = require("gulp-zip");
+const { dest } = require("gulp");
 
 const paths = {
 	sources: ["src/*"],
@@ -65,13 +67,21 @@ function copyStaticAssets() {
 	return gulp.src(paths.static).pipe(gulp.dest(paths.output));
 }
 
+function compressArtifacts() {
+	return gulp
+		.src(paths.output + "/**")
+		.pipe(zip("release.zip"))
+		.pipe(dest(paths.output));
+}
+
 // Not all tasks need to use streams.
 // A gulpfile is another node program
 // and you can use all packages available on npm.
 gulp.task("clean", clean);
 gulp.task("build", gulp.series("clean", transpile, bundleBackground, bundleContent, bundlePopup, outputScripts, cleanTmp, copyStaticAssets));
 gulp.task("watch", () => gulp.watch(paths.sources, gulp.series(["build"])));
-gulp.task("prodBuild", gulp.series("clean", transpile, bundleBackground, bundleContent, bundlePopup, minify, cleanTmp, copyStaticAssets));
+gulp.task("minify", gulp.series("clean", transpile, bundleBackground, bundleContent, bundlePopup, minify, cleanTmp, copyStaticAssets));
+gulp.task("pack", gulp.series("clean", transpile, bundleBackground, bundleContent, bundlePopup, minify, cleanTmp, copyStaticAssets, compressArtifacts));
 
 // The default task (called when you run `gulp` from CLI).
 gulp.task("default", gulp.series(["build", "watch"]));
