@@ -88,8 +88,12 @@ chrome.alarms.onAlarm.addListener((alarm) => {
 						});
 						chrome.tabs.remove(tabId);
 					} else {
-						chrome.tabs.sendMessage(tab.id, { text: "report_back" }, handleData);
-						chrome.tabs.remove(tabId);
+						var handleAndCloseTab = (result: any) => {
+							handleData(result);
+							chrome.tabs.remove(tabId);
+						};
+
+						chrome.tabs.sendMessage(tab.id, { text: "report_back" }, handleAndCloseTab);
 					}
 				}
 			});
