@@ -1,6 +1,6 @@
 {
 	"name": "Queue Tracker for EVGA",
-	"version": "0.3.0",
+	"version": "0.4.0",
 	"description": "Queue Tracker for EVGA helps track your position in the evga notification queues, estimating when you'll get your shiny new 3080.",
 	"icons": {
 		"16": "icon16.png",
