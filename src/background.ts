@@ -121,5 +121,12 @@ chrome.runtime.onMessage.addListener(function (request: { msg: string; product: 
 					chrome.runtime.sendMessage({ msg: "evga_queue_data", product: request.product, latestFulfilled: null });
 				}
 			});
+
+		db.collection("config")
+			.doc("popup-config")
+			.get()
+			.then((document) => {
+				chrome.runtime.sendMessage({ msg: "popup_config", data: document.data() });
+			});
 	}
 });

@@ -26,22 +26,18 @@ chrome.storage.local.get((items: { [key: string]: { product: string; userName: s
 	}
 });
 
-chrome.runtime.onMessage.addListener(function (
-	request: { msg: string; product: string; latestFulfilled: string; timeNotified: string; signupTime: string },
-	sender,
-	sendResponse
-) {
+chrome.runtime.onMessage.addListener(function (request: { msg: string }, sender, sendResponse) {
 	if (request.msg === "evga_queue_data") {
-		console.log(request);
-		let row = table.rows.namedItem(request.product);
+		let queueData: { product: string; latestFulfilled: string; timeNotified: string; signupTime: string } = request as any;
+		let row = table.rows.namedItem(queueData.product);
 
 		let queuePositionCell = row.insertCell(2);
 		let availabilityEstimateCell = row.insertCell(3);
 
-		if (request.latestFulfilled !== null) {
-			let latestFulfilled = DateTime.fromISO(request.latestFulfilled);
-			let timeNotified = DateTime.fromISO(request.timeNotified);
-			let signupTime = DateTime.fromISO(request.signupTime);
+		if (queueData.latestFulfilled !== null) {
+			let latestFulfilled = DateTime.fromISO(queueData.latestFulfilled);
+			let timeNotified = DateTime.fromISO(queueData.timeNotified);
+			let signupTime = DateTime.fromISO(queueData.signupTime);
 			queuePositionCell.innerHTML = latestFulfilled.toFormat("LLL dd, yyyy, hh:mm:ss a ZZZZ");
 
 			let evgaEpoch = DateTime.fromISO("2020-09-17T00:00:00+0000");
@@ -60,12 +56,10 @@ chrome.runtime.onMessage.addListener(function (
 			let timeNotifiedEpochDiff = timeNotified.diff(evgaEpoch);
 			let latestFulfilledEpochDiff = latestFulfilled.diff(evgaEpoch);
 			let latestWaitFactor =
-				request.timeNotified === null
+				queueData.timeNotified === null
 					? timeSinceEpoch.as("days") / latestFulfilledEpochDiff.as("days")
 					: timeNotifiedEpochDiff.as("days") / latestFulfilledEpochDiff.as("days");
-			let signupTimeEpochDiff = DateTime.fromISO(request.signupTime).diff(evgaEpoch);
-
-			console.log(latestWaitFactor, timeNotifiedEpochDiff, latestFulfilledEpochDiff, latestWaitFactor, signupTimeEpochDiff);
+			let signupTimeEpochDiff = DateTime.fromISO(queueData.signupTime).diff(evgaEpoch);
 
 			let estimate = DateTime.fromMillis(evgaEpoch.toMillis() + signupTimeEpochDiff.as("milliseconds") * latestWaitFactor);
 
@@ -80,5 +74,12 @@ chrome.runtime.onMessage.addListener(function (
 			queuePositionCell.innerHTML = "No data yet...";
 			availabilityEstimateCell.innerHTML = "";
 		}
+	} else if (request.msg === "popup_config") {
+		let config: { data: any } = request as any;
+		let header = document.getElementById("header");
+		let footer = document.getElementById("footer");
+
+		header.innerHTML = config.data.header || "";
+		footer.innerHTML = config.data.footer || "";
 	}
 });
